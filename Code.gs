@@ -306,6 +306,45 @@ function issueRefCodes() {
   SpreadsheetApp.getUi().alert('ออกรหัสใหม่ ' + n + ' รายการ ✅\nส่งรหัสให้ผู้แนะนำ ลูกค้ากรอกรหัสนี้ในช่อง "รหัสผู้แนะนำ" ของฟอร์ม\nหรือใช้ลิงก์ ' + liffUrl_('') + '?ref=รหัส ระบบจะกรอกให้อัตโนมัติ');
 }
 
+/* =====================================================================
+ *  Rich Menu — สร้างจากในสคริปต์ ใช้ token ใน Script Properties (ไม่ต้องคัดลอก token ไปที่อื่น)
+ * ===================================================================*/
+const RICHMENU_IMAGE_URL = 'https://raw.githubusercontent.com/psandsons/solarbytheos/main/richmenu.jpg';
+const RICHMENU_NAME = 'Solar ภาคประชาชน — เฟส 1';
+
+function setupRichMenu() {
+  const ui = SpreadsheetApp.getUi();
+  const token = prop_('LINE_CHANNEL_ACCESS_TOKEN'), liff = prop_('LIFF_ID');
+  if (!token || !liff) { ui.alert('ยังไม่ได้ตั้ง LINE_CHANNEL_ACCESS_TOKEN หรือ LIFF_ID ใน Script Properties'); return; }
+  const L = 'https://liff.line.me/' + liff;
+  const body = {
+    size: { width: 2500, height: 1686 }, selected: true, name: RICHMENU_NAME, chatBarText: '☀️ ลงทะเบียน',
+    areas: [
+      { bounds: { x: 0, y: 0, width: 1675, height: 834 }, action: { type: 'uri', label: 'ลงทะเบียน Solar', uri: L } },
+      { bounds: { x: 1675, y: 0, width: 825, height: 834 }, action: { type: 'uri', label: 'เช็กสถานะ', uri: L + '?view=status' } },
+      { bounds: { x: 0, y: 834, width: 836, height: 852 }, action: { type: 'message', label: 'แพ็กเกจและราคา', text: 'แพ็กเกจและราคา' } },
+      { bounds: { x: 836, y: 834, width: 827, height: 852 }, action: { type: 'message', label: 'สินเชื่อ 2.5%', text: 'สินเชื่อติดตั้งโซลาร์' } },
+      { bounds: { x: 1663, y: 834, width: 837, height: 852 }, action: { type: 'message', label: 'คุยกับเจ้าหน้าที่', text: 'ติดต่อเจ้าหน้าที่' } }
+    ]
+  };
+  const H = { Authorization: 'Bearer ' + token };
+  const call = (url, opt) => {
+    const r = UrlFetchApp.fetch(url, Object.assign({ headers: H, muteHttpExceptions: true }, opt || {}));
+    if (r.getResponseCode() >= 300) throw new Error(url + ' → ' + r.getResponseCode() + ' ' + r.getContentText());
+    const t = r.getContentText(); return t ? JSON.parse(t) : {};
+  };
+  // ลบเมนูชื่อเดิม
+  (call('https://api.line.me/v2/bot/richmenu/list').richmenus || [])
+    .filter(m => m.name === RICHMENU_NAME)
+    .forEach(m => call('https://api.line.me/v2/bot/richmenu/' + m.richMenuId, { method: 'delete' }));
+  const id = call('https://api.line.me/v2/bot/richmenu', { method: 'post', contentType: 'application/json', payload: JSON.stringify(body) }).richMenuId;
+  const img = UrlFetchApp.fetch(RICHMENU_IMAGE_URL).getBlob();
+  call('https://api-data.line.me/v2/bot/richmenu/' + id + '/content', { method: 'post', contentType: 'image/jpeg', payload: img.getBytes() });
+  call('https://api.line.me/v2/bot/user/all/richmenu/' + id, { method: 'post' });
+  log_('RICHMENU', 'ติดตั้ง Rich Menu ' + id);
+  ui.alert('ติดตั้ง Rich Menu แล้ว ✅\nเปิดแชท @solarbytheos ใหม่ในมือถือเพื่อดูเมนู');
+}
+
 function firstName_(n) { return String(n || '').trim().split(/\s+/)[0]; }
 function randomCode_(len) {
   const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // ตัด 0 O 1 I ที่สับสนง่าย
@@ -516,6 +555,8 @@ function onOpen() {
     .addItem('ดูเคสที่รอติดต่อ', 'filterOverdue')
     .addItem('ออกรหัสผู้แนะนำ (ชีตผู้แนะนำ)', 'issueRefCodes')
     .addItem('สร้าง Dashboard ใหม่', 'menuRebuildDashboard')
+    .addSeparator()
+    .addItem('ติดตั้ง/อัปเดต Rich Menu ของ LINE OA', 'setupRichMenu')
     .addToUi();
 }
 

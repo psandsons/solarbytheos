@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ลงทะเบียน Solar ภาคประชาชน — Theos Corporation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{
+  --g1:#00D400;--g2:#0A9A16;--g3:#0B5D14;--g4:#06380C;
+  --gr:#23282B;--mut:#6B7579;--line:#E1E7E3;--bg:#F3F6F2;--card:#fff;
+  --sun:#FFC21A;--red:#E0231B;--err:#D93025;--r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Sarabun,system-ui,sans-serif;background:var(--bg);color:var(--gr);font-size:16px;line-height:1.5;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+h1,h2,h3,.btn,.chip,.pill,.pkg b,.brand,.ticket,.case .id,.badge{font-family:Prompt,Sarabun,sans-serif}
+.hero{background:radial-gradient(600px 400px at 100% 0%,#14B41F,var(--g2) 40%,var(--g3) 80%);color:#fff;padding:22px 18px 74px;position:relative;overflow:hidden}
+.hero .sun{position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:radial-gradient(#FFE27A,#FFC21A 55%,#FF9F0A);opacity:.95}
+.brand{font-weight:600;font-size:13px;letter-spacing:.6px;opacity:.92;display:flex;gap:8px;align-items:center;position:relative}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--sun)}
+.hero h1{font-weight:700;font-size:26px;line-height:1.25;margin-top:12px;position:relative}
+.hero p{opacity:.92;margin-top:6px;font-size:15px;position:relative}
+.badge{display:inline-flex;gap:6px;align-items:center;background:var(--sun);color:var(--g4);font-weight:700;font-size:14px;border-radius:999px;padding:5px 12px;margin-top:10px;position:relative}
+.hello{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;position:relative}
+.hello img{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.6)}
+.wrap{max-width:560px;margin:-50px auto 0;padding:0 14px;position:relative}
+.card{background:var(--card);border-radius:var(--r);padding:18px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(11,93,20,.06)}
+.card h2{font-size:17px;font-weight:600;display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.card h2 .n{width:26px;height:26px;border-radius:8px;background:#E3F8E2;color:var(--g2);display:grid;place-items:center;font-size:14px;flex:none}
+label.f{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+.card h2+label.f{margin-top:0}
+label.f em{color:var(--err);font-style:normal}
+label.f small{font-weight:400;color:var(--mut)}
+input[type=text],input[type=tel],select,textarea{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--gr);outline:none;transition:border .15s;-webkit-appearance:none;appearance:none}
+select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236B7579' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px}
+input:focus,select:focus,textarea:focus{border-color:var(--g2)}
+.invalid{border-color:var(--err)!important}
+.errmsg{color:var(--err);font-size:13px;margin-top:4px;display:none}
+.invalid~.errmsg{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.invalid{outline:1.5px solid var(--err);outline-offset:4px;border-radius:12px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:500;color:var(--gr);cursor:pointer;user-select:none}
+.chip.on{border-color:var(--g2);background:#E9F9E8;color:var(--g3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2 label.f{margin-top:0}
+.note-box{font-size:13px;border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.45}
+.note-box.warn{color:#8A5A00;background:#FFF6DC}
+.note-box.info{color:var(--g3);background:#EEF9ED}
+/* packages */
+.pkgs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pkg{border:1.5px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;position:relative;background:#fff;user-select:none}
+.pkg b{display:block;font-size:20px;font-weight:700;color:var(--g4);line-height:1.1}
+.pkg span{display:block;font-size:13px;color:var(--mut)}
+.pkg .pr{font-family:Prompt,Sarabun,sans-serif;font-weight:700;color:var(--red);font-size:16px;margin-top:6px}
+.pkg.on{border-color:var(--g2);background:#F1FBF0;box-shadow:0 0 0 1.5px var(--g2) inset}
+.pkg.on::after{content:"✓";position:absolute;right:10px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:13px;display:grid;place-items:center;font-weight:700}
+.pkg.wide{grid-column:1/3;display:flex;align-items:center;gap:10px;padding:12px 14px}
+.pkg.wide b{font-size:15px}
+.pkgs.invalid{outline:1.5px solid var(--err);outline-offset:4px;border-radius:14px}
+.perks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.perks span{font-size:12px;background:#EEF9ED;color:var(--g3);border-radius:8px;padding:4px 8px}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.consent input{width:22px;height:22px;accent-color:var(--g2);flex:none;margin-top:1px}
+.consent a{color:var(--g2)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.btn{display:block;width:100%;max-width:532px;margin:0 auto;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:600;background:var(--g2);color:#fff;cursor:pointer;text-align:center;text-decoration:none}
+.btn:active{background:var(--g3)}
+.btn[disabled]{opacity:.6}
+.done{text-align:center;padding:28px 18px}
+.done .ok{width:72px;height:72px;border-radius:50%;background:#E3F8E2;display:grid;place-items:center;margin:0 auto 14px}
+.done h2{display:block;font-size:21px}
+.ticket{font-size:24px;font-weight:700;color:var(--g2);letter-spacing:1px;margin:10px 0}
+.next{text-align:left;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.next li{list-style:none;display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-bottom:8px}
+.next li i{width:22px;height:22px;border-radius:50%;background:#E3F8E2;color:var(--g2);font-style:normal;font-weight:700;font-size:12px;display:grid;place-items:center;flex:none;margin-top:1px}
+.hidden{display:none!important}
+/* status */
+.case{border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.case .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.case .id{font-weight:600}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;background:#E3F8E2;color:var(--g3);white-space:nowrap}
+.pill.lost{background:#EEE;color:#666}
+.pill.wait{background:#FFF3D1;color:#8A5A00}
+.tl{display:flex;margin:16px 0 6px}
+.tl div{flex:1;text-align:center;font-size:11px;color:var(--mut);position:relative;padding-top:20px;line-height:1.3}
+.tl div::before{content:"";position:absolute;top:4px;left:50%;width:12px;height:12px;border-radius:50%;background:#D5DCD8;transform:translateX(-50%);z-index:1}
+.tl div::after{content:"";position:absolute;top:9px;left:-50%;width:100%;height:3px;background:#D5DCD8}
+.tl div:first-child::after{display:none}
+.tl div.on{color:var(--g3);font-weight:600}
+.tl div.on::before,.tl div.on::after{background:var(--g1)}
+.meta{font-size:13px;color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:20px 0}
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--gr);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;display:none;max-width:90%}
+.spin{width:18px;height:18px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:s .8s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.refok{font-size:13px;margin-top:6px;display:none}
+.refok.good{display:block;color:var(--g2)}
+.refok.bad{display:block;color:var(--err)}
+.foot{text-align:center;font-size:12px;color:var(--mut);padding:6px 0 14px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<header class="hero">
+  <div class="sun"></div>
+  <div class="brand"><i></i>THEOS CORPORATION · SOLAR ภาคประชาชน</div>
+  <h1 id="heroTitle">ลงทะเบียนแสดงความสนใจ<br>Solar ภาคประชาชน</h1>
+  <p id="heroSub">เฟส 1 กรุงเทพฯ และปริมณฑล · สำรวจหน้างานฟรี</p>
+  <div class="badge" id="heroBadge">รับสิทธิ์เงินคืนสูงสุด 50,000 บาท*</div>
+  <div class="hello hidden" id="hello"><img id="avatar" alt=""><span id="hiName"></span></div>
+</header>
+
+<!-- ================= REGISTER ================= -->
+<main class="wrap" id="viewRegister">
+<form id="form" novalidate>
+  <section class="card">
+    <h2><span class="n">1</span>ข้อมูลติดต่อ</h2>
+    <label class="f" for="name">ชื่อ-นามสกุล <em>*</em></label>
+    <input type="text" id="name" autocomplete="name" required>
+    <div class="errmsg">กรุณากรอกชื่อ-นามสกุล</div>
+    <label class="f" for="phone">เบอร์โทรศัพท์ <em>*</em></label>
+    <input type="tel" id="phone" inputmode="tel" placeholder="08x-xxx-xxxx" required>
+    <div class="errmsg">กรุณากรอกเบอร์โทร 9–10 หลัก</div>
+    <label class="f">เวลาที่สะดวกให้ติดต่อกลับ</label>
+    <div class="chips" data-name="contactTime" data-single>
+      <span class="chip on">ช่วงเวลาไหนก็ได้</span><span class="chip">เช้า 9-12 น.</span><span class="chip">บ่าย 13-17 น.</span><span class="chip">เย็น 17-19 น.</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span>สถานที่ติดตั้ง</h2>
+    <div class="row2">
+      <div><label class="f" for="province">จังหวัด <em>*</em></label>
+        <select id="province" required>
+          <option value="">เลือก</option>
+          <option>กรุงเทพมหานคร</option><option>นนทบุรี</option><option>สมุทรปราการ</option>
+          <option value="__other">จังหวัดอื่น</option>
+        </select>
+        <div class="errmsg">เลือกจังหวัด</div></div>
+      <div><label class="f" for="district">เขต/อำเภอ <em>*</em></label>
+        <select id="district" required><option value="">เลือก</option></select>
+        <input type="text" id="districtText" class="hidden" placeholder="อำเภอ">
+        <div class="errmsg">ระบุเขต/อำเภอ</div></div>
+    </div>
+    <div id="otherProvWrap" class="hidden">
+      <label class="f" for="otherProvince">ระบุจังหวัด <em>*</em></label>
+      <input type="text" id="otherProvince">
+      <div class="errmsg">ระบุจังหวัด</div>
+      <div class="note-box warn">เฟส 1 เปิดรับเฉพาะพื้นที่ให้บริการของการไฟฟ้านครหลวง (กรุงเทพฯ นนทบุรี สมุทรปราการ) ลงทะเบียนไว้ได้ ทีมงานจะแจ้งทันทีเมื่อเปิดรับในพื้นที่ของคุณ</div>
+    </div>
+    <label class="f" for="address">ที่อยู่ / หมู่บ้าน / ซอย <small>(ไม่บังคับ)</small></label>
+    <input type="text" id="address" placeholder="ช่วยให้ทีมนัดสำรวจได้เร็วขึ้น">
+    <label class="f">ประเภทที่อยู่อาศัย <em>*</em></label>
+    <div class="chips" data-name="buildingType" data-single data-required>
+      <span class="chip">บ้านเดี่ยว</span><span class="chip">บ้านแฝด</span><span class="chip">ทาวน์โฮม</span><span class="chip">อาคารพาณิชย์</span><span class="chip">อื่นๆ</span>
+    </div>
+    <div class="errmsg">เลือกประเภทที่อยู่อาศัย</div>
+    <label class="f">ผู้ลงทะเบียนเป็น <em>*</em></label>
+    <div class="chips" data-name="ownership" data-single data-required>
+      <span class="chip">เจ้าของบ้าน</span><span class="chip">สมาชิกในครอบครัวเจ้าของบ้าน</span><span class="chip">ผู้เช่า</span>
+    </div>
+    <div class="errmsg">เลือกสถานะผู้ลงทะเบียน</div>
+    <label class="f">ประเภทหลังคา</label>
+    <div class="chips" data-name="roofType" data-single>
+      <span class="chip">เมทัลชีท</span><span class="chip">กระเบื้องลอนคู่</span><span class="chip">กระเบื้องซีแพค/โมเนีย</span><span class="chip">ดาดฟ้าคอนกรีต</span><span class="chip on">ไม่แน่ใจ</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span>แพ็กเกจ Solar On-grid ที่สนใจ</h2>
+    <div class="pkgs" id="pkgs">
+      <div class="pkg" data-v="5kW 1 เฟส" data-phase="1 เฟส"><b>5 kW</b><span>1 เฟส 220V</span><div class="pr">159,000 บาท</div></div>
+      <div class="pkg" data-v="5kW 3 เฟส" data-phase="3 เฟส"><b>5 kW</b><span>3 เฟส 380V</span><div class="pr">169,000 บาท</div></div>
+      <div class="pkg" data-v="10kW 1 เฟส" data-phase="1 เฟส"><b>10 kW</b><span>1 เฟส 220V</span><div class="pr">239,000 บาท</div></div>
+      <div class="pkg" data-v="10kW 3 เฟส" data-phase="3 เฟส"><b>10 kW</b><span>3 เฟส 380V</span><div class="pr">249,000 บาท</div></div>
+      <div class="pkg wide" data-v="ให้ทีมงานแนะนำ"><b>ยังไม่แน่ใจ — ให้ทีมงานแนะนำหลังสำรวจ</b></div>
+    </div>
+    <div class="errmsg" id="pkgErr">เลือกแพ็กเกจที่สนใจ</div>
+    <div class="perks"><span>ราคารวม VAT 7%</span><span>รับประกันระบบ + ล้างแผงฟรี 7 ปี</span><span>ประกันอัคคีภัย 7 ปี</span></div>
+    <label class="f">ระบบไฟฟ้าที่บ้าน (มิเตอร์)</label>
+    <div class="chips" data-name="phase" data-single>
+      <span class="chip">1 เฟส</span><span class="chip">3 เฟส</span><span class="chip on">ไม่แน่ใจ</span>
+    </div>
+    <label class="f">ต้องการขายไฟส่วนเกินคืนให้ภาครัฐ (การไฟฟ้า) ด้วยหรือไม่ <em>*</em></label>
+    <div class="chips" data-name="sellBack" data-single data-required>
+      <span class="chip">ต้องการขายไฟคืนด้วย</span><span class="chip">ไม่ขาย ใช้เองอย่างเดียว</span><span class="chip">ยังไม่แน่ใจ ให้ทีมแนะนำ</span>
+    </div>
+    <div class="errmsg">เลือกว่าต้องการขายไฟคืนหรือไม่</div>
+    <div class="note-box info hidden" id="sellNote">ทีมงานจะดำเนินการยื่นขอขายไฟส่วนเกินกับการไฟฟ้าให้ เงื่อนไขและอัตรารับซื้อเป็นไปตามประกาศของภาครัฐ</div>
+    <label class="f" for="ca">เลขที่บัญชีแสดงสัญญา (CA) จากบิลค่าไฟ กฟน. <small>(ไม่บังคับ)</small></label>
+    <input type="text" id="ca" inputmode="numeric" placeholder="ใช้สำหรับยื่นขอรับสิทธิ์ภายหลัง">
+    <div class="errmsg">กรอกเฉพาะตัวเลข</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span>การชำระเงินและนัดสำรวจ</h2>
+    <label class="f">รูปแบบการชำระเงินที่สนใจ</label>
+    <div class="chips" data-name="financing" data-single>
+      <span class="chip">เงินสด</span><span class="chip">สินเชื่อออมสิน</span><span class="chip">สินเชื่อ ธอส.</span><span class="chip">สินเชื่อ ธ.ก.ส.</span><span class="chip on">ยังไม่แน่ใจ</span>
+    </div>
+    <div class="note-box info">สินเชื่อติดตั้ง Solar ดอกเบี้ย 2.5% ต่อปี ผ่อนนานสูงสุด 7 ปี ทีมงานช่วยแนะนำการยื่นขอได้</div>
+    <label class="f">วันที่สะดวกให้ทีมเข้าสำรวจหน้างาน <small>(เลือกได้หลายข้อ)</small></label>
+    <div class="chips" data-name="surveyDays">
+      <span class="chip">จันทร์–ศุกร์</span><span class="chip">เสาร์</span><span class="chip">อาทิตย์</span>
+    </div>
+    <label class="f">ต้องการติดตั้งภายใน</label>
+    <div class="chips" data-name="timeline" data-single>
+      <span class="chip">1 เดือน</span><span class="chip">1-3 เดือน</span><span class="chip">3-6 เดือน</span><span class="chip on">ยังไม่แน่ใจ</span>
+    </div>
+    <label class="f" for="note">สอบถามเพิ่มเติม</label>
+    <textarea id="note" rows="3" placeholder="พิมพ์คำถามหรือรายละเอียดเพิ่มเติมได้เลย"></textarea>
+    <label class="f" for="refCode">รหัสผู้แนะนำ <small>(ถ้ามี)</small></label>
+    <input type="text" id="refCode" autocapitalize="characters" autocomplete="off" placeholder="กรอกรหัสที่ได้รับจากผู้แนะนำ" style="text-transform:uppercase;letter-spacing:1px">
+    <div class="refok" id="refOk"></div>
+    <label class="f" for="referral">รู้จักโครงการจากช่องทางไหน</label>
+    <select id="referral">
+      <option value="">เลือก</option><option>Facebook</option><option>TikTok</option><option>LINE</option><option>Google</option><option>เพื่อน/คนรู้จักแนะนำ</option><option>ป้าย/ใบปลิว</option><option>งานแสดงสินค้า/บูธ</option><option>อื่นๆ</option>
+    </select>
+  </section>
+
+  <section class="card">
+    <label class="consent"><input type="checkbox" id="consent">
+      <span>ข้าพเจ้ายินยอมให้ บริษัท ธีออส คอร์ปอเรชั่น จำกัด เก็บและใช้ข้อมูลข้างต้นเพื่อติดต่อกลับ นัดสำรวจหน้างาน เสนอราคา และดำเนินการยื่นขอรับสิทธิ์ในโครงการ ตาม<a href="#" id="pdpaLink">นโยบายความเป็นส่วนตัว</a> <em style="color:var(--err);font-style:normal">*</em></span></label>
+    <div class="errmsg" id="consentErr">กรุณายืนยันความยินยอม</div>
+  </section>
+  <p class="foot">*สิทธิ์เงินคืนเป็นไปตามหลักเกณฑ์ของภาครัฐ ความสมบูรณ์ของการลงทะเบียนขึ้นอยู่กับการพิจารณาของ กฟน.<br>ราคาแพ็กเกจเป็นราคาที่บริษัทนำเสนอเพื่อประกอบการตัดสินใจ</p>
+</form>
+
+<section class="card done hidden" id="done">
+  <div class="ok"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0A9A16" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h2>ลงทะเบียนเรียบร้อย ขอบคุณค่ะ</h2>
+  <div class="ticket" id="ticketNo"></div>
+  <p class="meta" id="doneMsg">เก็บรหัสนี้ไว้ติดตามสถานะได้จากเมนู "เช็กสถานะ"<br>ทีมงานจะติดต่อกลับเพื่อนัดสำรวจหน้างานภายใน 24 ชม. (วันทำการ)</p>
+  <ul class="next" id="nextSteps">
+    <li><i>1</i><span><b>ลงทะเบียนแสดงความสนใจ</b> — เรียบร้อยแล้ว ✓</span></li>
+    <li><i>2</i><span><b>สำรวจหน้างานและออกแบบระบบ</b> — ฟรี โดยทีมวิศวกร</span></li>
+    <li><i>3</i><span><b>เสนอราคาและยื่นขอรับสิทธิ์</b> — ทีมงานดูแลเอกสารให้</span></li>
+    <li><i>4</i><span><b>ติดตั้งและส่งมอบ</b> — พร้อมรับประกัน 7 ปี</span></li>
+  </ul>
+</section>
+</main>
+
+<!-- ================= STATUS ================= -->
+<main class="wrap hidden" id="viewStatus">
+  <section class="card">
+    <h2><span class="n">✓</span>คำขอของฉัน</h2>
+    <div id="caseList"><div class="empty">กำลังโหลด…</div></div>
+  </section>
+  <p class="foot">สอบถามเพิ่มเติม โทร 081-481-4114 หรือทักแชท @solarbytheos</p>
+</main>
+
+<div class="bar"><button class="btn" id="submitBtn" type="button">ส่งข้อมูลลงทะเบียน</button></div>
+
+<script>
+/* ================= CONFIG — แก้ 2 ค่านี้ก่อนใช้งาน ================= */
+const CONFIG = {
+  LIFF_ID: '2012342774-WXnvaGW4',                                                   // LINE Developers > LIFF
+  API_URL: 'https://script.google.com/macros/s/YOUR-DEPLOYMENT-ID/exec',     // Web app URL ของ Apps Script
+  PDPA_URL: 'https://www.theoscorp.biz/privacy',
+  OA_ID: '@solarbytheos'
+};
+/* ================================================================= */
+
+const DISTRICTS = {
+  'กรุงเทพมหานคร': ['คลองเตย','คลองสาน','คลองสามวา','คันนายาว','จตุจักร','จอมทอง','ดอนเมือง','ดินแดง','ดุสิต','ตลิ่งชัน','ทวีวัฒนา','ทุ่งครุ','ธนบุรี','บางกอกน้อย','บางกอกใหญ่','บางกะปิ','บางขุนเทียน','บางเขน','บางคอแหลม','บางแค','บางซื่อ','บางนา','บางบอน','บางพลัด','บางรัก','บึงกุ่ม','ปทุมวัน','ประเวศ','ป้อมปราบศัตรูพ่าย','พญาไท','พระโขนง','พระนคร','ภาษีเจริญ','มีนบุรี','ยานนาวา','ราชเทวี','ราษฎร์บูรณะ','ลาดกระบัง','ลาดพร้าว','วังทองหลาง','วัฒนา','สวนหลวง','สะพานสูง','สัมพันธวงศ์','สาทร','สายไหม','หนองจอก','หนองแขม','หลักสี่','ห้วยขวาง'],
+  'นนทบุรี': ['เมืองนนทบุรี','บางกรวย','บางใหญ่','บางบัวทอง','ไทรน้อย','ปากเกร็ด'],
+  'สมุทรปราการ': ['เมืองสมุทรปราการ','บางบ่อ','บางพลี','พระประแดง','พระสมุทรเจดีย์','บางเสาธง']
+};
+const STAGES = ['ลงทะเบียน','สำรวจหน้างาน','เสนอราคา','ยื่นขอรับสิทธิ์','ติดตั้ง'];
+const STATUS_TO_STEP = {'ใหม่':0,'ติดต่อแล้ว':0,'นัดสำรวจหน้างาน':1,'สำรวจแล้ว':1,'เสนอราคาแล้ว':2,'ยืนยันติดตั้ง':2,'ยื่นขอรับสิทธิ์ กฟน.':3,'กำลังติดตั้ง':4,'ติดตั้งเสร็จ':4};
+
+const $ = s => document.querySelector(s);
+let profile = null, idToken = null, demo = false, view = 'register';
+// LIFF ส่ง query ผ่าน liff.state ก่อน init — อ่านได้ทั้งสองแบบ
+const qp = k => { const q = new URLSearchParams(location.search); return q.get(k) || (q.get('liff.state') ? new URLSearchParams(q.get('liff.state').split('?')[1] || '').get(k) : null); };
+const readView = () => (qp('view') === 'status' ? 'status' : 'register');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+function toast(m, ms = 2600) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms); }
+
+/* ---------- LIFF init ---------- */
+async function init() {
+  $('#pdpaLink').href = CONFIG.PDPA_URL;
+  try {
+    if (!window.liff || CONFIG.LIFF_ID.startsWith('YOUR')) throw new Error('demo');
+    await liff.init({ liffId: CONFIG.LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    profile = await liff.getProfile();
+    idToken = liff.getIDToken();
+    $('#avatar').src = profile.pictureUrl || '';
+    $('#hiName').textContent = 'สวัสดีค่ะ คุณ' + profile.displayName;
+    $('#hello').classList.remove('hidden');
+  } catch (e) {
+    demo = true; profile = { userId: 'DEMO-USER', displayName: 'Demo' };
+    console.warn('Running in demo mode', e);
+  }
+  view = readView(); // อ่านหลัง liff.init เพราะ LIFF ส่ง query ผ่าน liff.state
+  if (view === 'status') showStatus();
+  else { const ref = qp('ref'); if (ref) { $('#refCode').value = ref.toUpperCase(); $('#referral').value = 'เพื่อน/คนรู้จักแนะนำ'; checkRef(); } }
+}
+
+/* ---------- Ref code in register form ---------- */
+let refTimer, refValid = null;
+async function checkRef() {
+  const code = $('#refCode').value.trim().toUpperCase(), box = $('#refOk');
+  refValid = null; box.className = 'refok';
+  if (!code) return;
+  if (code.length < 3) return;
+  try {
+    const r = await api({ action: 'checkRef', code });
+    if (code !== $('#refCode').value.trim().toUpperCase()) return;
+    refValid = !!r.valid;
+    box.className = 'refok ' + (r.valid ? 'good' : 'bad');
+    box.textContent = r.valid ? `✓ ผู้แนะนำ: คุณ${r.name}` : 'ไม่พบรหัสนี้ กรุณาตรวจสอบอีกครั้ง หรือเว้นว่างไว้';
+  } catch (e) {}
+}
+$('#refCode').addEventListener('input', () => { clearTimeout(refTimer); refValid = null; refTimer = setTimeout(checkRef, 500); });
+
+/* ---------- Province → district ---------- */
+$('#province').addEventListener('change', () => {
+  const p = $('#province').value, other = p === '__other';
+  $('#otherProvWrap').classList.toggle('hidden', !other);
+  $('#district').classList.toggle('hidden', other);
+  $('#districtText').classList.toggle('hidden', !other);
+  $('#district').innerHTML = (DISTRICTS[p] ? '<option value="">เลือก</option>' + DISTRICTS[p].map(d => `<option>${d}</option>`).join('') : '<option value="">เลือก</option>');
+});
+
+/* ---------- Chips & packages ---------- */
+document.querySelectorAll('.chips').forEach(g => g.addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  if (g.hasAttribute('data-single')) g.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
+  else c.classList.toggle('on');
+  g.classList.remove('invalid');
+  if (g.dataset.name === 'sellBack') $('#sellNote').classList.toggle('hidden', chipVal('sellBack') !== 'ต้องการขายไฟคืนด้วย');
+}));
+const chipVal = n => [...document.querySelectorAll(`.chips[data-name="${n}"] .chip.on`)].map(x => x.textContent).join(', ');
+function setChip(n, text) { document.querySelectorAll(`.chips[data-name="${n}"] .chip`).forEach(x => x.classList.toggle('on', x.textContent === text)); }
+
+$('#pkgs').addEventListener('click', e => {
+  const p = e.target.closest('.pkg'); if (!p) return;
+  document.querySelectorAll('.pkg').forEach(x => x.classList.toggle('on', x === p));
+  $('#pkgs').classList.remove('invalid'); $('#pkgErr').style.display = 'none';
+  if (p.dataset.phase) setChip('phase', p.dataset.phase);   // เลือกแพ็กเกจ = ระบุเฟสให้อัตโนมัติ
+});
+const pkgVal = () => document.querySelector('.pkg.on')?.dataset.v || '';
+
+document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', () => el.classList.remove('invalid')));
+$('#consent').addEventListener('change', () => { if ($('#consent').checked) $('#consentErr').style.display = 'none'; });
+
+/* ---------- Validate & submit ---------- */
+function validate() {
+  let ok = true; const mark = (el, bad) => { el.classList.toggle('invalid', bad); if (bad) ok = false; };
+  const other = $('#province').value === '__other';
+  mark($('#name'), !$('#name').value.trim());
+  mark($('#phone'), !/^0\d{8,9}$/.test($('#phone').value.replace(/[\s-]/g, '')));
+  mark($('#province'), !$('#province').value);
+  if (other) { mark($('#otherProvince'), !$('#otherProvince').value.trim()); mark($('#districtText'), !$('#districtText').value.trim()); }
+  else mark($('#district'), !$('#district').value);
+  mark($('#ca'), !!$('#ca').value.trim() && !/^\d{6,14}$/.test($('#ca').value.replace(/[\s-]/g, '')));
+  document.querySelectorAll('.chips[data-required]').forEach(g => mark(g, !g.querySelector('.chip.on')));
+  if (refValid === false) { $('#refCode').classList.add('invalid'); ok = false; }
+  const pk = !!pkgVal(); $('#pkgs').classList.toggle('invalid', !pk); $('#pkgErr').style.display = pk ? 'none' : 'block'; if (!pk) ok = false;
+  const c = $('#consent').checked; $('#consentErr').style.display = c ? 'none' : 'block'; if (!c) ok = false;
+  if (!ok) { (document.querySelector('.invalid') || $('#consent')).scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('กรุณากรอกข้อมูลให้ครบถ้วน'); }
+  return ok;
+}
+
+async function api(payload) {
+  if (demo) {
+    await new Promise(r => setTimeout(r, 700));
+    if (payload.action === 'checkRef') return payload.code === 'TH0001' ? { ok: true, valid: true, name: 'วิชัย' } : { ok: true, valid: false };
+    return payload.action === 'register'
+      ? { ok: true, ticket: 'SBT-DEMO-0001', inArea: payload.data.inArea }
+      : { ok: true, cases: [{ ticket: 'SBT-2611-0007', status: 'นัดสำรวจหน้างาน', createdAt: new Date().toISOString(), province: 'นนทบุรี', district: 'บางกรวย', pkg: '5kW 1 เฟส', owner: 'คุณเอ (ทีมขาย)', nextAction: 'สำรวจหน้างาน ส. 8 พ.ย. 10:00 น.' }] };
+  }
+  // text/plain เพื่อหลีกเลี่ยง CORS preflight ของ Apps Script
+  const r = await fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...payload, idToken, userId: profile?.userId }) });
+  return r.json();
+}
+
+$('#submitBtn').onclick = async () => {
+  if (view === 'status' || !$('#done').classList.contains('hidden')) { closeOrBack(); return; }
+  if (!validate()) return;
+  const btn = $('#submitBtn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>กำลังส่งข้อมูล…';
+  const other = $('#province').value === '__other';
+  const data = {
+    name: $('#name').value.trim(), phone: $('#phone').value.replace(/[\s-]/g, ''), contactTime: chipVal('contactTime'),
+    province: other ? $('#otherProvince').value.trim() : $('#province').value,
+    district: other ? $('#districtText').value.trim() : $('#district').value,
+    inArea: !other, address: $('#address').value.trim(),
+    buildingType: chipVal('buildingType'), ownership: chipVal('ownership'), roofType: chipVal('roofType'),
+    pkg: pkgVal(), phase: chipVal('phase'), sellBack: chipVal('sellBack'), ca: $('#ca').value.replace(/[\s-]/g, ''),
+    financing: chipVal('financing'), surveyDays: chipVal('surveyDays'), timeline: chipVal('timeline'),
+    note: $('#note').value.trim(), referral: $('#referral').value,
+    refCode: refValid === false ? '' : $('#refCode').value.trim().toUpperCase(),
+    consent: true, lineName: profile?.displayName || ''
+  };
+  try {
+    const res = await api({ action: 'register', data });
+    if (!res.ok) throw new Error(res.error || 'error');
+    $('#toast').style.display = 'none';
+    $('#form').classList.add('hidden'); $('#done').classList.remove('hidden');
+    $('#ticketNo').textContent = res.ticket;
+    if (!data.inArea) {
+      $('#doneMsg').innerHTML = 'ขณะนี้เฟส 1 เปิดรับเฉพาะกรุงเทพฯ นนทบุรี และสมุทรปราการ<br>เราบันทึกรายชื่อของคุณไว้แล้ว และจะแจ้งทาง LINE ทันทีเมื่อเปิดรับในพื้นที่ของคุณ';
+      $('#nextSteps').classList.add('hidden');
+    }
+    window.scrollTo(0, 0); btn.disabled = false; btn.textContent = 'ปิดหน้านี้';
+    if (!demo && liff.isInClient()) liff.sendMessages([{ type: 'text', text: `ลงทะเบียน Solar ภาคประชาชนแล้ว รหัส ${res.ticket}` }]).catch(() => {});
+  } catch (e) {
+    console.error(e); btn.disabled = false; btn.textContent = 'ส่งข้อมูลลงทะเบียน';
+    toast('ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 4000);
+  }
+};
+
+function closeOrBack() { if (!demo && liff.isInClient()) liff.closeWindow(); else location.href = 'https://line.me/R/ti/p/' + CONFIG.OA_ID; }
+
+/* ---------- Status view ---------- */
+async function showStatus() {
+  $('#viewRegister').classList.add('hidden'); $('#viewStatus').classList.remove('hidden');
+  $('#heroTitle').innerHTML = 'ติดตามสถานะ<br>Solar ภาคประชาชน'; $('#heroSub').textContent = 'อัปเดตจากทีมงานแบบเรียลไทม์'; $('#heroBadge').classList.add('hidden');
+  $('#submitBtn').textContent = 'กลับไปที่แชท';
+  try {
+    const res = await api({ action: 'status' });
+    const list = res.cases || [];
+    if (!list.length) {
+      $('#caseList').innerHTML = `<div class="empty">ยังไม่มีการลงทะเบียน<br><br><a class="btn" href="https://liff.line.me/${CONFIG.LIFF_ID}">ลงทะเบียนเลย</a></div>`; return;
+    }
+    $('#caseList').innerHTML = list.map(c => {
+      const lost = c.status === 'ไม่สนใจ/ยกเลิก', wait = c.status === 'รอเปิดพื้นที่';
+      const step = STATUS_TO_STEP[c.status] ?? 0;
+      return `<div class="case">
+        <div class="top"><span class="id">${esc(c.ticket)}</span><span class="pill ${lost ? 'lost' : wait ? 'wait' : ''}">${esc(c.status)}</span></div>
+        ${lost || wait ? '' : `<div class="tl">${STAGES.map((s, i) => `<div class="${i <= step ? 'on' : ''}">${s}</div>`).join('')}</div>`}
+        <div class="meta">ลงทะเบียน ${new Date(c.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })} · ${esc(c.district)} ${esc(c.province)}</div>
+        ${c.pkg ? `<div class="meta">แพ็กเกจที่สนใจ: ${esc(c.pkg)}</div>` : ''}
+        ${c.owner ? `<div class="meta">ผู้ดูแล: ${esc(c.owner)}</div>` : ''}
+        ${wait ? `<div class="meta" style="color:#8A5A00;margin-top:4px">เราจะแจ้งทาง LINE ทันทีเมื่อเปิดรับในพื้นที่ของคุณ</div>` : ''}
+        ${c.nextAction ? `<div class="meta" style="color:var(--g3);font-weight:600;margin-top:4px">ขั้นต่อไป: ${esc(c.nextAction)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch (e) { $('#caseList').innerHTML = '<div class="empty">โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง</div>'; }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -258,7 +258,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--g2)}
 /* ================= CONFIG — แก้ 2 ค่านี้ก่อนใช้งาน ================= */
 const CONFIG = {
   LIFF_ID: '2012342774-WXnvaGW4',                                                   // LINE Developers > LIFF
-  API_URL: 'https://script.google.com/macros/s/YOUR-DEPLOYMENT-ID/exec',     // Web app URL ของ Apps Script
+  API_URL: 'https://script.google.com/macros/s/AKfycbwHcwagoRNXA9gNGnXhyOKg-6Y5oRbxQE4PWAxMaTXyc2B1XZpixIf-PhyiB4flhSpVUw/exec',     // Web app URL ของ Apps Script
   PDPA_URL: 'https://www.theoscorp.biz/privacy',
   OA_ID: '@solarbytheos'
 };
@@ -411,7 +411,7 @@ $('#submitBtn').onclick = async () => {
     if (!demo && liff.isInClient()) liff.sendMessages([{ type: 'text', text: `ลงทะเบียน Solar ภาคประชาชนแล้ว รหัส ${res.ticket}` }]).catch(() => {});
   } catch (e) {
     console.error(e); btn.disabled = false; btn.textContent = 'ส่งข้อมูลลงทะเบียน';
-    toast('ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 4000);
+    toast(e.message === 'too_many' ? 'วันนี้ลงทะเบียนครบจำนวนแล้ว หากต้องการแก้ไขข้อมูล ทักแชทเจ้าหน้าที่ได้เลย' : 'ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 5000);
   }
 };
 

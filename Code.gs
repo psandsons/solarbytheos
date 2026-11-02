@@ -1,4 +1,6 @@
 /**
+ * @OnlyCurrentDoc  — จำกัดสิทธิ์ให้สคริปต์เข้าถึงได้เฉพาะชีตนี้
+ *
  * Theos Corporation — ระบบบริหารการลงทะเบียน "Solar ภาคประชาชน" (LINE OA @solarbytheos)
  * Google Apps Script ผูกกับ Google Sheet (Extensions > Apps Script)
  *
@@ -13,12 +15,14 @@
  *   LINE_CHANNEL_ACCESS_TOKEN  (Messaging API channel ของ @solarbytheos)
  *   LINE_LOGIN_CHANNEL_ID      (LINE Login channel ที่มี LIFF — ใช้ยืนยัน idToken)
  *   LIFF_ID                    (เช่น 2001234567-AbCdEfGh)
- *   TEAM_GROUP_ID              (ระบบกรอกให้เองเมื่อเชิญบอทเข้ากลุ่ม LINE ทีมงาน)
+ *   TEAM_GROUP_ID              (ระบบกรอกให้เองเมื่อพิมพ์ #ตั้งกลุ่มทีม <รหัส> ในกลุ่ม LINE ทีมงาน)
+ *   TEAM_SETUP_CODE            (สร้างจากเมนู "สร้างรหัสตั้งกลุ่มทีม" — ใช้ได้ครั้งเดียว)
  */
 
 const SHEET = { LEADS: 'Leads', REF: 'ผู้แนะนำ', LISTS: 'ตั้งค่า', DASH: 'Dashboard', LOG: 'Log' };
 const TICKET_PREFIX = 'SBT';
 const SLA_HOURS = 24;
+const MAX_REG_PER_USER_PER_DAY = 3;   // กันสแปม/กันโควตาข้อความ LINE หมด
 const CONTACT_PHONE = '081-481-4114';
 const REF_PREFIX = 'TH';                       // รหัสผู้แนะนำ เช่น TH7K2QM
 
@@ -126,6 +130,7 @@ function register_(body, userId) {
     // กันกดส่งซ้ำ: ผู้ใช้ LINE หรือเบอร์เดิม ภายใน 10 นาที → คืนรหัสเดิม
     const dup = findRecentDuplicate_(sh, userId, d.phone);
     if (dup) return { ok: true, ticket: dup, duplicate: true, inArea: inArea };
+    if (countRecentByUser_(sh, userId) >= MAX_REG_PER_USER_PER_DAY) throw new Error('too_many');
 
     ticket = nextTicket_();
     const now = new Date();
@@ -177,6 +182,15 @@ function findRecentDuplicate_(sh, userId, phone) {
     if (same) return r[map.ticket - 1];
   }
   return '';
+}
+
+function countRecentByUser_(sh, userId) {
+  if (!userId) return 0;
+  const map = headerMap_(sh), last = sh.getLastRow();
+  if (last < 2) return 0;
+  const from = Math.max(2, last - 300);
+  return sh.getRange(from, 1, last - from + 1, sh.getLastColumn()).getValues()
+    .filter(r => r[map.userId - 1] === userId && r[map.createdAt - 1] instanceof Date && Date.now() - r[map.createdAt - 1] < 864e5).length;
 }
 
 function nextTicket_() {
@@ -404,18 +418,55 @@ function pushStatusUpdate_(userId, ticket, status, text) {
 }
 
 /* ---------- Webhook: จำกลุ่มทีมงาน ---------- */
+// ความปลอดภัย: ใครก็เชิญ OA เข้ากลุ่มได้ และ Apps Script ตรวจลายเซ็น webhook ไม่ได้
+// จึงตั้งกลุ่มทีมได้เฉพาะเมื่อพิมพ์ "#ตั้งกลุ่มทีม <รหัส>" ด้วยรหัสลับที่สร้างจากเมนูในชีต (ใช้ได้ครั้งเดียว)
+// และตรวจกับ LINE API ว่าบอทอยู่ในกลุ่มนั้นจริง ส่วนกลุ่มอื่นที่เชิญบอทเข้าไป บอทจะออกเองทันที
 function handleWebhook_(events) {
+  const props = PropertiesService.getScriptProperties();
   events.forEach(ev => {
     const src = ev.source || {};
-    if (src.type !== 'group') return;
-    const isJoin = ev.type === 'join';
-    const isCmd = ev.type === 'message' && ev.message && ev.message.type === 'text' && /^#ตั้งกลุ่มทีม$/.test(ev.message.text.trim());
-    if (isJoin || isCmd) {
-      PropertiesService.getScriptProperties().setProperty('TEAM_GROUP_ID', src.groupId);
-      log_('TEAM_GROUP', 'ตั้งกลุ่มแจ้งเตือน ' + src.groupId);
+    if (src.type !== 'group' || !src.groupId) return;
+    const team = props.getProperty('TEAM_GROUP_ID');
+    const code = props.getProperty('TEAM_SETUP_CODE');
+    const text = ev.type === 'message' && ev.message && ev.message.type === 'text' ? String(ev.message.text).trim() : '';
+    const m = text.match(/^#ตั้งกลุ่มทีม\s+(\S+)$/);
+
+    if (m && code && m[1] === code && botInGroup_(src.groupId)) {
+      props.setProperty('TEAM_GROUP_ID', src.groupId);
+      props.deleteProperty('TEAM_SETUP_CODE');           // รหัสใช้ได้ครั้งเดียว
+      log_('TEAM_GROUP', 'ตั้งกลุ่มแจ้งเตือนใหม่');
       lineReply_(ev.replyToken, [{ type: 'text', text: '✅ ตั้งกลุ่มนี้เป็นกลุ่มรับแจ้งเตือนการลงทะเบียน Solar ภาคประชาชนแล้ว' }]);
+      return;
     }
+    if (src.groupId === team) return;                   // กลุ่มทีมจริง — ไม่ต้องทำอะไร
+    // กลุ่มอื่น: ถ้ายังไม่มีรหัสตั้งกลุ่มรออยู่ ให้บอทออกจากกลุ่ม
+    if (!code && (ev.type === 'join' || ev.type === 'message')) leaveGroup_(src.groupId);
   });
+}
+
+function botInGroup_(groupId) {
+  const token = prop_('LINE_CHANNEL_ACCESS_TOKEN');
+  if (!token) return false;
+  const r = UrlFetchApp.fetch('https://api.line.me/v2/bot/group/' + encodeURIComponent(groupId) + '/summary',
+    { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
+  return r.getResponseCode() === 200;
+}
+
+function leaveGroup_(groupId) {
+  const token = prop_('LINE_CHANNEL_ACCESS_TOKEN');
+  if (!token) return;
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/group/' + encodeURIComponent(groupId) + '/leave',
+    { method: 'post', headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
+  log_('LEFT_GROUP', 'ออกจากกลุ่มที่ไม่ใช่กลุ่มทีม');
+}
+
+// เมนู: สร้างรหัสลับสำหรับตั้ง/ย้ายกลุ่มทีม (ใช้ได้ครั้งเดียว หมดอายุเมื่อใช้)
+function makeTeamSetupCode() {
+  const code = randomCode_(8);
+  PropertiesService.getScriptProperties().setProperty('TEAM_SETUP_CODE', code);
+  SpreadsheetApp.getUi().alert('รหัสตั้งกลุ่มทีม: ' + code +
+    '\n\n1) เชิญ @solarbytheos เข้ากลุ่ม LINE ทีมงาน\n2) พิมพ์ในกลุ่ม:  #ตั้งกลุ่มทีม ' + code +
+    '\n\nรหัสใช้ได้ครั้งเดียว อย่าส่งให้คนนอก — ระหว่างที่มีรหัสรออยู่ บอทจะยังไม่ออกจากกลุ่มอื่นอัตโนมัติ');
 }
 
 /* =====================================================================
@@ -459,6 +510,7 @@ function onOpen() {
     .addItem('1) ตั้งค่าชีตครั้งแรก', 'setupSheets')
     .addItem('2) ติดตั้งทริกเกอร์ (แจ้งสถานะ + สรุปรายวัน)', 'installTriggers')
     .addSeparator()
+    .addItem('สร้างรหัสตั้งกลุ่มทีม LINE', 'makeTeamSetupCode')
     .addItem('ทดสอบส่งแจ้งเตือนเข้ากลุ่มทีม', 'testTeamNotify')
     .addItem('ส่งสรุปประจำวันตอนนี้', 'menuDailySummary')
     .addItem('ดูเคสที่รอติดต่อ', 'filterOverdue')
@@ -614,7 +666,7 @@ function installTriggers() {
 }
 
 function testTeamNotify() {
-  if (!prop_('TEAM_GROUP_ID')) { SpreadsheetApp.getUi().alert('ยังไม่มีกลุ่มทีม\nเชิญ @solarbytheos เข้ากลุ่ม LINE ทีมงาน หรือพิมพ์ #ตั้งกลุ่มทีม ในกลุ่ม'); return; }
+  if (!prop_('TEAM_GROUP_ID')) { SpreadsheetApp.getUi().alert('ยังไม่มีกลุ่มทีม\nใช้เมนู "สร้างรหัสตั้งกลุ่มทีม LINE" แล้วทำตามขั้นตอน'); return; }
   notifyTeamNewLead_('SBT-TEST-0000', { name: 'ทดสอบ ระบบ', phone: '0800000000', contactTime: 'ช่วงเวลาไหนก็ได้', district: 'บางกรวย', province: 'นนทบุรี', buildingType: 'บ้านเดี่ยว', ownership: 'เจ้าของบ้าน', pkg: '5kW 1 เฟส', phase: '1 เฟส', financing: 'สินเชื่อออมสิน', surveyDays: 'เสาร์' }, 2, true);
   SpreadsheetApp.getUi().alert('ส่งข้อความทดสอบเข้ากลุ่มแล้ว');
 }
